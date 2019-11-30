@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="./p5/p5.min.js" type="text/javascript"></script>
+    <script src="./p5/p5.dom.js" type="text/javascript"></script>
+    <script src="./p5/p5.sound.min.js" type="text/javascript"></script>
+      <!-- A-Frame libraries -->
+    <script language="javascript" type="text/javascript" src="./p5/aframe.min.js"></script>
+
+    <!-- AFrameP5 library -->
+    <script language="javascript" type="text/javascript" src="./p5/aframep5.js"></script>
+
+
+
+  <script src="https://unpkg.com/aframe-look-at-component@0.8.x/dist/aframe-look-at-component.min.js"></script> 
+
+  </head>
+
+  <style type="text/css" media="screen">
+
+  .racer {
+    position: absolute;
+    left: 0px;
+    font-size: 100px;
+  }
+
+  .player1 {
+    top: 50px;
+  }
+
+  .player2 {
+    top: 300px
+  }
+
+  .play-area {
+    position: relative;
+    width: 800px;
+    height: 500px;
+    border-right: 3px dashed black;
+  }
+
+  button {
+    font-size: 3em;
+  }
+  </style>
+
+  <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="main.js"></script>
+
+    <!-- <button class="player1Btn">Move Tears of Joy &rarr;</button> -->
+    <div class="play-area">
+      <!-- <div class="racer player1">&#128514;</div>
+      <div class="racer player2">&#128561;</div> -->
+    </div>
+    <!-- <button class="player2Btn">Move Face Screaming &rarr;</button> -->
+
+
+
+    <a-scene id="VRScene">
+
+			<a-asset id="plane_obj" src="images/building/plane/model.obj"></a-asset>
+			<a-asset id="plane_mtl" src="images/building/plane/materials.mtl"></a-asset>
+      <!-- <a-entity camera="active: true" look-controls position="0 1.6 0" data-aframe-default-camera></a-entity> -->
+      <!-- <a-camera wasd-controls-enabled="false"></a-camera> -->
+    </a-scene>
+  </body>
+</html>
