@@ -122,7 +122,9 @@ socket.on('currentPlayers', function(data) {    //display current players
         container.id = b.id
 
         playerArrayClient.push(container)
+        // followMyObject();
         world.add( container )
+
     }
   });
 
@@ -153,7 +155,10 @@ world.camera.holder.setAttribute('wasd-controls','enabled:false');
 
 	// add the plane to our world
 	world.add(g);
+  console.log(playerArrayClient,'obj has not instantiated yet');
+
 }
+
 
 let pushthis = false;
 let moving;
@@ -171,7 +176,22 @@ function draw() {
       socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //down
     }
   }
+
+  if(playerArrayClient.length > 0) {
+    followMyObject();     //updates camera live
+  }
+
 } // end of draw
+
+
+function followMyObject() {
+  playerArrayClient.forEach((each) => {
+    if (socket.id == each.id) {
+      console.log(world.camera)
+      world.camera.setPosition(each.getX(),each.getY()+3,each.getZ()+10);
+    }
+  });
+}
 
 
 function keyPressed() {
