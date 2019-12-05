@@ -4,12 +4,6 @@ server = require('http').Server(app);
 const io = require('socket.io')(server);
 app.use(express.static('public'));
 
-// let player1xPos = 0;
-// let player2xPos = 0;
-//
-// let initialPos_p1 = player1xPos;
-// let initialPos_p2 = player2xPos;
-
 let playerArrayServer = [];
 
 class Player {
@@ -19,67 +13,58 @@ class Player {
     this.zPos = zPos;
     this.userId = userId;
     this.yRotation = yRotation;
+    // this.yCurrentRotation = 0;
   }
 }
+
+//1. problem
+//when the player is not active - players' positions remain in the same position as before
+// maybe from clientside, use setinterval to update
+
+
+//2. problem
+// rotation is not remembered - when object is first inititated
+
+
+//3.
+//how to make camera follow obj
+//use set position -> camera -> set it stand right behind obj
+
+// 3. keyboard - two arrows pressed config
+
+// git commit -m 'position has been corrected, rotation has been correct, but player remains in the same position when browser is not active, and also player's initial rotation need to be implemented'
 
 io.on('connect', (socket) => {
   console.log();
   console.log(socket.id, 'connected');
 
-  // let initX = Math.floor(Math.random() * 3);
-  // let initY = 0.1
-  // let initZ = Math.floor(Math.random() * 3);
-
-  let initX = 0
+  let initX = Math.floor(Math.random() * 5)
   let initY = 0;
   let initZ = -5
 
   playerArrayServer.push(new Player(initX, initY, initZ,  socket.id, 0));
 
-  playerArrayServer.forEach((each) => {
-    // console.log(each)
-  })
+  console.log(playerArrayServer.length,'length of it now')
 
-  io.emit('init', {initX: initX, initY: initY, initZ: initZ, userId: socket.id});
+  //this updates the class everytime a player is moved, then the updated position becomes the initital pos for new incoming players
 
-  let posX;
-  let posY;
-  let posZ;
-  // socket.on('moveMyPlayer_left', function(data) {
-  //   playerArrayServer.forEach((each)=>{
-  //     console.log('left')
-  //     if (data.playerId == each.userId) {
-  //       each.xPos -= 0.1;
-  //     }
-  //
-  //     io.emit('movedMyPlayer', {xPos: each.xPos,
-  //                               yPos: each.yPos,
-  //                               zPos: each.zPos,
-  //                               userId: each.userId
-  //                             });
-  //   });
-  // });
-  // socket.on('moveMyPlayer_up', function(data) {
-  //   console.log('up')
-  //   playerArrayServer.forEach((each)=>{
-  //     if (data.playerId == each.userId) {
-  //       each.zPos -= 0.1;
-  //     }
-  //
-  //     io.emit('movedMyPlayer', {xPos: each.xPos,
-  //                               yPos: each.yPos,
-  //                               zPos: each.zPos,
-  //                               userId: each.userId
-  //                             });
-  //   });
-  // });
+  socket.on('sendBack_newPos', function(data) {
+    playerArrayServer.forEach((each) => {
+        if (each.userId == data.userId){
 
+            each.xPos = data.newPosX;
+            each.yPos = data.newPosY;
+            each.zPos = data.newPosZ;
+            // each.yCurrentRotation = data.yCurrentRotation;
+        }
+    });
+    // console.log(data,'new position payload');
+    // console.log(playerArrayServer);
+  });
 
   socket.on('moveMyPlayer', function(data) {
-    // console.log('mousepressed')
-    // console.log('key is pressed', data.direction)
-
     playerArrayServer.forEach((each)=>{
+      each.nudgeAmount;
 
       if (data.playerId == each.userId) {
         if (data.direction === 37) {
@@ -89,61 +74,37 @@ io.on('connect', (socket) => {
           each.xPos += 0.1;
 
         } else if (data.direction === 38) {
-          each.zPos -= 0.3;
+          // each.zPos -= 0.05;
+          each.nudgeAmount = 0.05;
 
         } else if (data.direction === 40) {
-          each.zPos += 0.3;
-
+          // each.zPos += 0.05;
+          each.nudgeAmount = -0.05;
         }
-        // each.yPos += 0.1;    //when mousepressed debug
 
         io.emit('movedMyPlayer', {xPos: each.xPos,
                                   yPos: each.yPos,
                                   zPos: each.zPos,
-                                  userId: each.userId
-
+                                  userId: each.userId,
+                                  nudgeAmount: each.nudgeAmount
                                 });
-
-        // setTimeout(()=>{
-          io.emit('updateContainer', {userId: each.userId})
-        // },1000)
       }
     });
-
   });
 
   socket.on('moveMyPlayerForward', function(data) {
-    // console.log('mousepressed')
-    // console.log('key is pressed', data.direction)
-
     playerArrayServer.forEach((each)=>{
 
       if (data.playerId == each.userId) {
-        console.log(data,'hm')
           each.xPos = data.xLocation;
           each.yPos = data.yLocation;
           each.zPos = data.zLocation;
-
-          // each.zPos -= 0.1;
-
         }
-        // each.yPos += 0.1;    //when mousepressed debug
-
-        // io.emit('movedMyPlayer', {xPos: each.xPos,
-        //                           yPos: each.yPos,
-        //                           zPos: each.zPos,
-        //                           userId: each.userId
-        //
-        //                         });
-       // io.emit('updateCurrentPlayers', {currentPlayers: playerArrayServer})
     });
-
   });
 
   socket.on('rotateMyPlayer', function(data) {
-    // console.log('data.yRotation recieved')
-
-
+    // console.log('data.yRotation recieved', data.yRotation)
 
     playerArrayServer.forEach((each)=>{
       if (data.playerId == each.userId) {
@@ -152,45 +113,47 @@ io.on('connect', (socket) => {
         if (data.direction === 37) {
           // each.yRotation += 0.03;
           each.yRotation = 1;
-          // or
-          // each.yRotation = 1; //if using spinY
 
         } else if (data.direction === 39) {
           // each.yRotation -= 0.03;
           each.yRotation = -1;
         }
-      }
-      io.emit('rotatedMyPlayer', {yRotation: each.yRotation, userId: each.userId})
-    });
 
+        io.emit('rotatedMyPlayer', {yRotation: each.yRotation, userId: each.userId})
+      }
+
+      // used to be here - from 'cr'
+    });
   });
 
-
+  console.log("player has connected")
   io.emit('currentPlayers', {currentPlayers: playerArrayServer} )
+  //!important = this is what's setting the position of users - both initial and changed position
 
+  // xPos: 0,
+  // yPos: 0,
+  // zPos: -5,
+  // they all used to have this - which is defined in init
 
   socket.on('disconnect', function() {
     console.log(socket.id, 'disconnected');
+    console.log('Number of playerArrayServer is ', playerArrayServer.length );
 
-    console.log(playerArrayServer.length, 'number of playerArrayServer')
     for (let j = 0; j < playerArrayServer.length; j++) {
         if (playerArrayServer[j].userId == socket.id) {
+          console.log(socket.id,' Bye!');
 
-          console.log(socket.id,'is gone!');
           playerArrayServer.splice(j, 1);
           j -= 1;
         }
     }
-    console.log(playerArrayServer.length, 'number of playerArrayServer')
+    console.log('Number of playerArrayServer is ', playerArrayServer.length );
 
     io.emit('disconnect', {id: socket.id});
-
   });
-
-
-})
-
+});
 
 
 const PORT = process.env.PORT || 4444;
+console.log('Running on port ' + PORT);
 server.listen(PORT);
