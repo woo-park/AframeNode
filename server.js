@@ -13,7 +13,7 @@ class Player {
     this.zPos = zPos;
     this.userId = userId;
     this.yRotation = yRotation;
-    // this.yCurrentRotation = 0;
+    this.yCurrentRotation = 0;
   }
 }
 
@@ -26,7 +26,7 @@ class Player {
 // rotation is not remembered - when object is first inititated
 
 
-//3.
+//3.                                 => done
 //how to make camera follow obj
 //use set position -> camera -> set it stand right behind obj
 
@@ -55,7 +55,7 @@ io.on('connect', (socket) => {
             each.xPos = data.newPosX;
             each.yPos = data.newPosY;
             each.zPos = data.newPosZ;
-            // each.yCurrentRotation = data.yCurrentRotation;
+            each.yCurrentRotation = data.yCurrentRotation;
         }
     });
     // console.log(data,'new position payload');
@@ -68,10 +68,12 @@ io.on('connect', (socket) => {
 
       if (data.playerId == each.userId) {
         if (data.direction === 37) {
-          each.xPos -= 0.1;
+          // each.xPos -= 0.1;
+          // each.xRotationValue = -0.1;
 
         } else if (data.direction === 39) {
-          each.xPos += 0.1;
+          // each.xPos += 0.1;
+          // each.xRotationValue = 0.1;
 
         } else if (data.direction === 38) {
           // each.zPos -= 0.05;
@@ -126,9 +128,16 @@ io.on('connect', (socket) => {
     });
   });
 
-  console.log("player has connected")
-  io.emit('currentPlayers', {currentPlayers: playerArrayServer} )
+  console.log("player has connected");
   //!important = this is what's setting the position of users - both initial and changed position
+  console.log(playerArrayServer,'playerArrayServer -> before sending out Position & Rotation');
+
+  socket.on('debug', function(data) {
+    console.log(playerArrayServer,'playerArrayServer -> before sending out Position & Rotation');
+  })
+
+  io.emit('currentPlayers', {currentPlayers: playerArrayServer} )
+
 
   // xPos: 0,
   // yPos: 0,

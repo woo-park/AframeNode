@@ -41,7 +41,7 @@ socket.on('init', function(data){
 			// e.setRed(random(255));
 		}
 	});
-
+  b.setGreen(green);
   b.id = data.userId;
 
 });
@@ -66,6 +66,7 @@ let playerArrayServer;
 // })
 
 socket.on('currentPlayers', function(data) {    //display current players
+  debugHelper();
   playerArrayServer = data.currentPlayers;
   playerArrayServer.forEach((each)=>{
 
@@ -104,7 +105,9 @@ socket.on('currentPlayers', function(data) {    //display current players
         //!set the pos here
         container = new Container3D({x:each.xPos, y:each.yPos, z:each.zPos});
         //testing
-        // container.rotationY = each.yCurrentRotation;
+        console.log(each.yCurrentRotation,'retrived??');
+        container.spinY(each.yCurrentRotation);
+        console.log(container.rotationY,'applied??')
         // {x:each.getX(), y:each.getY(), z:each.getZ()}
 
         // add in a little "sensor" in front of the shark we will have the shark
@@ -151,13 +154,29 @@ function setup() {
 world.camera.holder.setAttribute('wasd-controls','enabled:false');
 
 	// create a plane to serve as our "ground"
-	var g = new Plane({x:0, y:0, z:0, width:500, height:500, red:0, green:102, blue:153, rotationX:-90, metalness:0.25, transparent:true, opacity:0.5});
+	var g = new Plane({x:0, y:0, z:0, width:500, height:500, red:0, green:102, blue:153, rotationX:-90, metalness:0.25, transparent:false, opacity:1});
 
 	// add the plane to our world
 	world.add(g);
   console.log(playerArrayClient,'obj has not instantiated yet');
 
 }
+
+function mousePressed() {
+  debugHelper();
+  return false;
+}
+
+function debugHelper() {
+  socket.emit('debug');
+  playerArrayClient.forEach((each, index) => {
+    console.log(`player${index}, x: ${each.getX()}, z: ${each.getZ()}, rotated: ${each.rotationY}`);
+  });
+  // console.log(playerArrayClient[0].rotationY,'playerArrayClient');
+
+}
+//major problem =-=== 1 is overwriting 0// don't know where that is happening
+
 
 
 let pushthis = false;
@@ -187,7 +206,7 @@ function draw() {
 function followMyObject() {
   playerArrayClient.forEach((each) => {
     if (socket.id == each.id) {
-      console.log(world.camera)
+      // console.log(world.camera)
       world.camera.setPosition(each.getX(),each.getY()+3,each.getZ()+10);
     }
   });
@@ -213,6 +232,15 @@ socket.on('rotatedMyPlayer', function(data) {
       // each.children[0].spinY(data.yRotation);
       each.spinY(data.yRotation);
       // world.camera.rotateY(data.yRotation);
+
+      //possibly have to set here again????????
+      // socket.emit('sendBack_newPos', {
+      //   newPosX:each.getWorldPosition().x,
+      //   newPosY:each.getWorldPosition().y,
+      //   newPosZ:each.getWorldPosition().z,
+      //   userId:socket.id,
+      //   yCurrentRotation:each.rotationY
+      // });
     }
   });
 });
@@ -263,16 +291,16 @@ socket.on('movedMyPlayer', function(data) {
         }
         MoveForward();
 
-        //!important
+        //!important  // should this go 'here mark'
         socket.emit('sendBack_newPos', {
           newPosX:each.getWorldPosition().x,
           newPosY:each.getWorldPosition().y,
           newPosZ:each.getWorldPosition().z,
-          userId:socket.id
-          // ,
-          // yCurrentRotation:each.rotationY
+          userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
+          yCurrentRotation:each.rotationY
         });
-
+        // console.log(each.getRotationY,'1')    //this one returns null
+        console.log(each.rotationY,'2')
 
       // each.children[0].setPosition(data.xPos,data.yPos,data.zPos) //
       // each.children[1].setPosition(data.xPos,data.yPos,data.zPos) //
@@ -281,6 +309,8 @@ socket.on('movedMyPlayer', function(data) {
       // console.log(each.rotationY)
       // incrementing from the serversid
     }
+    // 'mark here'
+
   });
 });
 
