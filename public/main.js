@@ -197,10 +197,6 @@ function draw() {
 
       changed = true;
       socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
-    } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(UP_ARROW) && pressed) {
-      changed = true;
-      socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
-      nudgeForward(0.05);
     } else if (keyIsDown(UP_ARROW) && pressed) {
       changed = true;
       nudgeForward(0.05);
@@ -213,6 +209,16 @@ function draw() {
 
       // socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //down
     }
+
+    //circling around
+    // else if ((keyIsDown(RIGHT_ARROW) || keyIsDown(UP_ARROW) && pressed)) {
+    //   changed = true;
+    //   socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
+    //   nudgeForward(0.05);
+    //   // alert('huh')
+    // }
+
+
     if (changed == true) {
       //** emit the new position of THIS character // emit('setPos')
 
