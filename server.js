@@ -48,6 +48,7 @@ io.on('connect', (socket) => {
 
   //this updates the class everytime a player is moved, then the updated position becomes the initital pos for new incoming players
 
+
   socket.on('sendBack_newPos', function(data) {
     playerArrayServer.forEach((each) => {
         if (each.userId == data.userId){
@@ -56,10 +57,28 @@ io.on('connect', (socket) => {
             each.yPos = data.newPosY;
             each.zPos = data.newPosZ;
             each.yCurrentRotation = data.yCurrentRotation;
+
         }
-    });
+
+
     // console.log(data,'new position payload');
     // console.log(playerArrayServer);
+
+    // need to emit -> that is not itself
+
+    // socket.broadcast.emit('broadcast', {xPos: each.xPos,
+    //                           yPos: each.yPos,
+    //                           zPos: each.zPos,
+    //                           userId: each.userId,
+    //                           nudgeAmount: each.nudgeAmount
+    //                         });
+      io.emit('broadcast', {xPos: each.xPos,
+                                yPos: each.yPos,
+                                zPos: each.zPos,
+                                userId: each.userId,
+                                nudgeAmount: each.nudgeAmount
+                              });
+    });
   });
 
   socket.on('moveMyPlayer', function(data) {
@@ -84,12 +103,12 @@ io.on('connect', (socket) => {
           each.nudgeAmount = -0.05;
         }
 
-        io.emit('movedMyPlayer', {xPos: each.xPos,
-                                  yPos: each.yPos,
-                                  zPos: each.zPos,
-                                  userId: each.userId,
-                                  nudgeAmount: each.nudgeAmount
-                                });
+        // io.emit('movedMyPlayer', {xPos: each.xPos,
+        //                           yPos: each.yPos,
+        //                           zPos: each.zPos,
+        //                           userId: each.userId,
+        //                           nudgeAmount: each.nudgeAmount
+        //                         });
       }
     });
   });

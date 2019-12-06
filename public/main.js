@@ -66,7 +66,7 @@ let playerArrayServer;
 // })
 
 socket.on('currentPlayers', function(data) {    //display current players
-  debugHelper();
+  // debugHelper();
   playerArrayServer = data.currentPlayers;
   playerArrayServer.forEach((each)=>{
 
@@ -154,10 +154,11 @@ function setup() {
 world.camera.holder.setAttribute('wasd-controls','enabled:false');
 
 	// create a plane to serve as our "ground"
-	var g = new Plane({x:0, y:0, z:0, width:500, height:500, red:0, green:102, blue:153, rotationX:-90, metalness:0.25, transparent:false, opacity:1});
+	var g = new Plane({x:0, y:0, z:0, width:50, height:50, red:0, green:102, blue:153, rotationX:-90, metalness:0.25, transparent:true, opacity:0.4, asset:'grid'});
 
 	// add the plane to our world
 	world.add(g);
+
   console.log(playerArrayClient,'obj has not instantiated yet');
 
 }
@@ -180,27 +181,170 @@ function debugHelper() {
 
 
 let pushthis = false;
-let moving;
-
+let pressed = false
 
 function draw() {
-  if (moving == true && keyIsDown ) {
-    if (keyCode === LEFT_ARROW) {
+    let changed = false;
+
+    if (keyIsDown(LEFT_ARROW) && pressed) {
+      // rotate this player to the left
+
+      changed = true;
       socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //left
-    } else if (keyCode === RIGHT_ARROW) {
+    } else if (keyIsDown(RIGHT_ARROW) && pressed) {
+      //actually rotate the player
+
+
+      changed = true;
       socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
-    } else if (keyCode === UP_ARROW) {
-      socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //up
-    } else if (keyCode === DOWN_ARROW) {
-      socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //down
+    } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(UP_ARROW) && pressed) {
+      changed = true;
+      socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
+      nudgeForward(0.05);
+    } else if (keyIsDown(UP_ARROW) && pressed) {
+      changed = true;
+      nudgeForward(0.05);
+
+
+      // socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //up
+    } else if ( keyIsDown(DOWN_ARROW) && pressed) {
+      changed = true;
+      nudgeForward(-0.05);
+
+      // socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //down
     }
-  }
+    if (changed == true) {
+      //** emit the new position of THIS character // emit('setPos')
+
+      playerArrayClient.forEach((each) => {
+        if (socket.id == each.id) {
+
+            //!important  // should this go 'here mark'
+            socket.emit('sendBack_newPos', {
+              newPosX:each.getWorldPosition().x,
+              newPosY:each.getWorldPosition().y,
+              newPosZ:each.getWorldPosition().z,
+              userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
+              yCurrentRotation:each.rotationY
+            });
+            // console.log(each.getRotationY,'1')    //this one returns null
+            console.log(each.rotationY,'2')
+
+          // each.children[0].setPosition(data.xPos,data.yPos,data.zPos) //
+          // each.children[1].setPosition(data.xPos,data.yPos,data.zPos) //
+          // each.setPosition(data.xPos,data.yPos,data.zPos) //
+          // each.nudge(0,0,-0.1);
+          // console.log(each.rotationY)
+          // incrementing from the serversid
+        }
+        // 'mark here'
+
+      });
+    }
 
   if(playerArrayClient.length > 0) {
     followMyObject();     //updates camera live
   }
-
 } // end of draw
+
+function keyPressed(){
+  pressed = true;
+}
+
+function keyReleased(){
+  pressed = false;
+}
+
+//receive event from the server- that updataes all the coordinates and rot of the players
+//do not move this client() io.socket.broadcast - bc the player might nudge back to the ---
+
+socket.on('broadcast', function(data) {
+  playerArrayClient.forEach((each) => {
+    if (data.userId == each.id) {
+       // each.setPosition(data.xPos,data.yPos,data.zPos)
+      if (each.id == socket.id) {     //awesome
+          //it's myself so skip
+      } else {
+        each.setPosition(data.xPos,data.yPos,data.zPos)
+      }
+
+    }
+
+  });
+
+});
+//possibly
+//dropped messgage
+
+//periodically pings the positions
+//draw, settimeout - couple hundred frames
+function nudgeForward(nudgeAmount){
+  playerArrayClient.forEach((each) => {
+    if (socket.id == each.id) {
+
+      // distance to move
+      // let d = data.nudgeAmount;
+      let d = nudgeAmount;
+
+      // move forward a little bit (this code uses some math that I wrote for the 'moveUserForward' function)
+
+      // compute the world position of our sensor (not the local position inside of our container)
+      let vectorHUD = new THREE.Vector3();
+      // console.log(vectorHUD);
+      vectorHUD.setFromMatrixPosition(each.children[0].tag.object3D.matrixWorld);
+
+      // now compute how far off we are from this position
+      let xDiff = vectorHUD.x - each.getX();
+      let yDiff = vectorHUD.y - each.getY();
+      let zDiff = vectorHUD.z - each.getZ();
+
+      // nudge the container toward this position
+      each.nudge(xDiff * d, yDiff * d, zDiff * d);
+
+      let changedPosX = each.getX()
+      let changedPosY = each.getY()
+      let changedPosZ = each.getZ()
+
+      console.log(changedPosX +' # '+ changedPosY +' # '+ changedPosZ);
+      console.log(each.getWorldPosition().x + ' '+ each.getWorldPosition().y+' '+each.getWorldPosition().z )
+    }
+  });
+}
+
+
+//NOT USING
+socket.on('movedMyPlayer', function(data) {
+  playerArrayClient.forEach((each) => {
+    if (data.userId == each.id) {
+
+
+
+
+
+        //!important  // should this go 'here mark'
+        socket.emit('sendBack_newPos', {
+          newPosX:each.getWorldPosition().x,
+          newPosY:each.getWorldPosition().y,
+          newPosZ:each.getWorldPosition().z,
+          userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
+          yCurrentRotation:each.rotationY
+        });
+        // console.log(each.getRotationY,'1')    //this one returns null
+        console.log(each.rotationY,'2')
+
+      // each.children[0].setPosition(data.xPos,data.yPos,data.zPos) //
+      // each.children[1].setPosition(data.xPos,data.yPos,data.zPos) //
+      // each.setPosition(data.xPos,data.yPos,data.zPos) //
+      // each.nudge(0,0,-0.1);
+      // console.log(each.rotationY)
+      // incrementing from the serversid
+    }
+    // 'mark here'
+
+  });
+});
+
+
 
 
 function followMyObject() {
@@ -212,16 +356,6 @@ function followMyObject() {
   });
 }
 
-
-function keyPressed() {
-  moving = true;
-  // return false;
-}
-
-function keyReleased() {
-  moving = false;
-  // return false;
-}
 
 
 socket.on('rotatedMyPlayer', function(data) {
@@ -258,61 +392,6 @@ function emitEvent(arg,obj,time = 1000,) {
 }
 
 
-socket.on('movedMyPlayer', function(data) {
-  playerArrayClient.forEach((each) => {
-    if (data.userId == each.id) {
-
-        function MoveForward() {
-          // distance to move
-          let d = data.nudgeAmount;
-
-          // move forward a little bit (this code uses some math that I wrote for the 'moveUserForward' function)
-
-          // compute the world position of our sensor (not the local position inside of our container)
-          let vectorHUD = new THREE.Vector3();
-          // console.log(vectorHUD);
-          vectorHUD.setFromMatrixPosition(each.children[0].tag.object3D.matrixWorld);
-
-          // now compute how far off we are from this position
-          let xDiff = vectorHUD.x - each.getX();
-          let yDiff = vectorHUD.y - each.getY();
-          let zDiff = vectorHUD.z - each.getZ();
-
-          // nudge the container toward this position
-          each.nudge(xDiff * d, yDiff * d, zDiff * d);
-
-          let changedPosX = each.getX()
-          let changedPosY = each.getY()
-          let changedPosZ = each.getZ()
-
-          console.log(changedPosX +' # '+ changedPosY +' # '+ changedPosZ);
-          console.log(each.getWorldPosition().x + ' '+ each.getWorldPosition().y+' '+each.getWorldPosition().z )
-
-        }
-        MoveForward();
-
-        //!important  // should this go 'here mark'
-        socket.emit('sendBack_newPos', {
-          newPosX:each.getWorldPosition().x,
-          newPosY:each.getWorldPosition().y,
-          newPosZ:each.getWorldPosition().z,
-          userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
-          yCurrentRotation:each.rotationY
-        });
-        // console.log(each.getRotationY,'1')    //this one returns null
-        console.log(each.rotationY,'2')
-
-      // each.children[0].setPosition(data.xPos,data.yPos,data.zPos) //
-      // each.children[1].setPosition(data.xPos,data.yPos,data.zPos) //
-      // each.setPosition(data.xPos,data.yPos,data.zPos) //
-      // each.nudge(0,0,-0.1);
-      // console.log(each.rotationY)
-      // incrementing from the serversid
-    }
-    // 'mark here'
-
-  });
-});
 
 // https://www.npmjs.com/package/aframe-look-at-component
 
