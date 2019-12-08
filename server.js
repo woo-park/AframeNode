@@ -40,7 +40,7 @@ io.on('connect', (socket) => {
 
   let initX = Math.floor(Math.random() * 5)
   let initY = 0;
-  let initZ = -5
+  let initZ = -1;
 
   playerArrayServer.push(new Player(initX, initY, initZ,  socket.id, 0));
 
@@ -155,7 +155,10 @@ io.on('connect', (socket) => {
     console.log(playerArrayServer,'playerArrayServer -> before sending out Position & Rotation');
   })
 
-  io.emit('currentPlayers', {currentPlayers: playerArrayServer} )
+  socket.on('worldReady',function(){
+      io.emit('currentPlayers', {currentPlayers: playerArrayServer} )
+  })
+
 
 
   // xPos: 0,

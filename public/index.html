@@ -20,7 +20,7 @@
 
   <style type="text/css" media="screen">
 
-  .racer {
+  /* .racer {
     position: absolute;
     left: 0px;
     font-size: 100px;
@@ -43,7 +43,13 @@
 
   button {
     font-size: 3em;
-  }
+  } */
+
+
+  body {
+				padding: 0;
+				margin: 0;
+			}
   </style>
 
   <body>
@@ -65,6 +71,30 @@
 
 			<a-asset id="plane_obj" src="images/building/plane/model.obj"></a-asset>
 			<a-asset id="plane_mtl" src="images/building/plane/materials.mtl"></a-asset>
+
+      <!-- from vr-maze -->
+      <img src="images/asphalt.png" id="stone">
+
+        <a-asset id="tree1_obj" src="./objects/tree1/model.obj"></a-asset>
+        <a-asset id="tree1_mtl" src="./objects/tree1/materials.mtl"></a-asset>
+
+        <!-- <a-asset id="tree2_obj" src="./objects/tree2/model.obj"></a-asset>
+        <a-asset id="tree2_mtl" src="./objects/tree2/materials.mtl"></a-asset>
+
+        <a-asset id="tree3_obj" src="./objects/tree3/model.obj"></a-asset>
+        <a-asset id="tree3_mtl" src="./objects/tree3/materials.mtl"></a-asset>
+
+        <a-asset id="tree4_obj" src="./objects/tree4/model.obj"></a-asset>
+        <a-asset id="tree4_mtl" src="./objects/tree4/materials.mtl"></a-asset> -->
+
+        <a-asset id="bush1_obj" src="./objects/bush1/model.obj"></a-asset>
+        <a-asset id="bush1_mtl" src="./objects/bush1/materials.mtl"></a-asset>
+
+        <!-- <img id="stonebrick" src="images/stonebrick.png" /> -->
+        <a-asset id="treasure" src="./objects/treasure/model.obj"></a-asset>
+        <a-asset id="treasure_mtl" src="./objects/treasure/materials.mtl"></a-asset>
+
+      <!--  -->
       <!-- <a-entity camera="active: true" look-controls position="0 1.6 0" data-aframe-default-camera></a-entity> -->
       <!-- <a-camera wasd-controls-enabled="false"></a-camera> -->
     </a-scene>
