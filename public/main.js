@@ -29,6 +29,10 @@ function setup() {
 	// add the plane to our world
 	world.add(ground);
 
+
+	world.threeSceneReference.fog = new THREE.FogExp2( 0xffffff, 0.1)
+	// world.cursorPosition.x = '-200px';
+	world.setFlying(true);
   console.log(playerArrayClient,'obj has not instantiated yet');
 
 }
@@ -70,11 +74,11 @@ class Sensor {
               i--;
             }
           }
-          console.log(this.intersectsFront[0].object.el.object3D.userData.solid,'solid?');
-          console.log(this.intersectsFront.length);
+          // console.log(this.intersectsFront[0].object.el.object3D.userData.solid,'solid?');
+          // console.log(this.intersectsFront.length);
 
           if (this.intersectsFront.length > 0) {
-            console.log(this.intersectsFront[0],'first')
+            // console.log(this.intersectsFront[0],'first')
             return this.intersectsFront[0];
           }
           return false;
@@ -86,9 +90,9 @@ class Sensor {
 
 
 const socket = io();
-
+let map;
 //vr
-let map = [
+let map1 = [
   [1,1,1,1,1,1,1,1,1,1,1,1],
   [1,0,0,0,3,0,3,0,0,0,0,1],
   [1,0,3,3,3,0,3,0,3,3,0,1],
@@ -103,6 +107,23 @@ let map = [
   [1,0,3,5,0,0,0,0,0,0,0,1],
   [1,1,1,1,1,1,1,1,1,1,1,1]
 ];
+
+let map2 = [
+	[1,1,1,1,1,1,1,1,1,1,1,1],
+	[1,3,3,3,3,3,3,3,3,3,3,1],
+	[1,3,0,0,0,0,0,0,0,0,3,1],
+	[1,3,0,0,0,0,3,0,0,0,3,1],
+	[1,3,0,0,0,0,0,0,0,0,3,1],
+	[1,3,0,0,0,3,3,0,0,0,3,1],
+	[1,3,0,0,0,3,3,0,0,0,3,1],
+	[1,3,0,0,0,0,0,0,0,0,3,1],
+	[1,3,0,0,0,0,0,0,0,0,3,1],
+	[1,3,0,0,0,0,0,0,0,0,3,1],
+	[1,3,0,0,0,0,0,0,0,0,3,1],
+	[1,3,3,5,3,3,3,3,3,3,3,1],
+	[1,1,1,1,1,1,1,1,1,1,1,1]
+]
+map = map2;		//defines current map
 
 let tileSize = 10;
 let worldSize = 144;
@@ -306,6 +327,7 @@ function drawMap() {
       tree1.tag.object3D.userData.solid = true;
       bush1.tag.object3D.userData.solid = true;
 
+
       if ( map[row][col] == 3 ) {
         containerMap.addChild(bush1);
       }
@@ -384,11 +406,11 @@ function draw() {
         playerArrayClient.forEach((each) => {
           if (socket.id == each.id) {
             // sensor.getEntityInFrontOfUser();
-            console.log(sensor,'sensor')
+            // console.log(sensor,'sensor')
             // console.log(sensor.getEntityInFrontOfUser());
             objectAhead = sensor.getEntityInFrontOfUser();
 
-            console.log(objectAhead,'obj ahead');
+            // console.log(objectAhead,'obj ahead');
           }});
       }
     }
@@ -407,7 +429,7 @@ function draw() {
 
       changed = true;
       socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
-    } else if (keyIsDown(UP_ARROW) && pressed) {
+    } else if (keyIsDown(UP_ARROW) && pressed || mouseIsPressed) {
       okToMove = true;
 
       // if there is an object, it is close and it is solid, prevent motion
@@ -423,6 +445,7 @@ function draw() {
         // world.moveUserForward(0.1);
         changed = true;
         nudgeForward(0.05);
+				world.moveUserForward(0.05);
       }
       // socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //up
     } else if ( keyIsDown(DOWN_ARROW) && pressed) {
@@ -440,6 +463,7 @@ function draw() {
         // world.moveUserForward(0.1);
         changed = true;
         nudgeForward(-0.05);
+
       }
 
       // socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //down
@@ -611,7 +635,9 @@ socket.on('rotatedMyPlayer', function(data) {
       // each.children[0].spinY(data.yRotation);
       each.spinY(data.yRotation);
       // world.camera.rotateY(data.yRotation);
-
+			// world.camera.holder.rotationObj.y += 1;
+			// world.VRScene.rotateY += 1;
+			// world.el.components.camera.camera.rotation.y += 1
       //possibly have to set here again????????
       // socket.emit('sendBack_newPos', {
       //   newPosX:each.getWorldPosition().x,
