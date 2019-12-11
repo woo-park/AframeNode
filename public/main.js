@@ -25,9 +25,10 @@ function initScreen() {
 
 	firstScreen = new Plane({
 		side:'double',
-		red: 40, green: 40, blue: 40,
+		red: 180, green: 180, blue: 180,
+		opacity:0.8,
 		width: 10,
-		x:0, y:0, z:0,
+		x:-10, y:1, z:-10,
 		height: 10
 	});
 	world.camera.cursor.addChild(firstScreen);
@@ -39,7 +40,7 @@ function initScreen() {
 									So look around how many are also online\n
 									And be the first one to find it!
 									;
-					width:${firstScreen.width / 10};
+					width:8;
 					color: rgb(0,0,0);
 					align: center;`
 				);
@@ -48,10 +49,12 @@ function initScreen() {
 	//// create a plane to serve as a holder for our text
 	textHolder = new Plane({
 		side:'double',
-		red: 40, green: 40, blue: 40,
-		width: 3.5,
+		red: 180, green: 180, blue: 180,
+		opacity:0.8,
+		width: 4.5,
 		x:10, y:2, z:-10,
-		height: 2.5
+		height: 2.5,
+
 
 	});
 	world.camera.cursor.addChild(textHolder);
@@ -213,7 +216,8 @@ let sequential_moving = () => {
 
 
 setTimeout(()=>{
-	if (world.camera.cursor){
+	console.log(world.camera.cursor.children.length,'exists?');
+	if (world.camera.cursor.children.length > 1){
 		world.camera.cursor.removeChild(firstScreen);
 		gameStarted = true;
 	}
@@ -237,7 +241,7 @@ function setup() {
 
 	currentTime = minute();
 	currentSec = second();
-// world.camera.holder.setAttribute('wasd-controls','enabled:false');
+world.camera.holder.setAttribute('wasd-controls','enabled:false');
 
 	// create a plane to serve as our "ground"
 	var ground = new Plane({x:0, y:0, z:0, width:worldSize, height:worldSize, rotationX:-90, metalness:0.25, asset:'asphalt'});
@@ -246,7 +250,7 @@ function setup() {
 	world.add(ground);
 
 
-	// world.threeSceneReference.fog = new THREE.FogExp2( 0xffffff, 0.1)
+	world.threeSceneReference.fog = new THREE.FogExp2( 0xffffff, 0.1)
 	// world.cursorPosition.x = '-200px';
 	// world.setFlying(true);
   console.log(playerArrayClient,'obj has not instantiated yet');
@@ -340,7 +344,23 @@ let map2 = [
 	[1,3,3,5,3,3,3,3,3,3,3,1],
 	[1,1,1,1,1,1,1,1,1,1,1,1]
 ]
-map = map2;	//defines current map
+
+let map3 = [
+	[1,1,1,1,1,1,1,1,1,1,1,1],
+	[1,3,3,3,3,3,3,0,3,0,5,1],
+	[1,0,3,0,0,3,0,0,0,0,3,1],
+	[1,0,3,0,0,0,3,0,3,0,0,1],
+	[1,0,3,0,3,0,0,0,3,0,3,1],
+	[1,0,3,0,3,3,3,0,3,0,0,1],
+	[1,0,3,0,3,3,3,0,3,0,3,1],
+	[1,0,0,0,3,0,0,0,0,0,0,1],
+	[1,3,0,0,3,0,0,0,0,3,0,1],
+	[1,3,0,0,3,0,0,0,0,3,0,1],
+	[1,3,0,0,0,0,0,0,0,3,0,1],
+	[1,3,3,5,3,3,3,3,3,3,0,1],
+	[1,1,1,1,1,1,1,1,1,1,1,1]
+]
+map = map3;	//defines current map
 
 let tileSize = 10;
 let worldSize = 144;
@@ -728,12 +748,14 @@ function draw() {
 
       changed = true;
       socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //left
+			spinPlayer(1)
     } else if (keyIsDown(RIGHT_ARROW) && pressed) {
       //actually rotate the player
 
 
       changed = true;
       socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
+			spinPlayer(-1)
     } else if (keyIsDown(UP_ARROW) && pressed || mouseIsPressed) {
       okToMove = true;
 
@@ -840,6 +862,7 @@ socket.on('broadcast', function(data) {
           //it's myself so skip
       } else {
         each.setPosition(data.xPos,data.yPos,data.zPos)
+				each.rotateY(data.yCurrentRotation);					///chek
       }
 
     }
@@ -886,6 +909,14 @@ function nudgeForward(nudgeAmount){
 }
 
 
+function spinPlayer(spinAmount) {
+	playerArrayClient.forEach((each) => {
+		if (socket.id == each.id) {
+			each.spinY(spinAmount);
+		}
+	});
+}
+
 //NOT USING
 socket.on('movedMyPlayer', function(data) {
   playerArrayClient.forEach((each) => {
@@ -925,42 +956,50 @@ socket.on('movedMyPlayer', function(data) {
 
 let playerNum = 0;
 function displayTextPanel() {
+
+	// console.log(myTimeMinute);
+
 	if(textHolder) {
 		textHolder.tag.setAttribute('text',
 					`value: Number of Players Online: ${playerNum}\n
 									Find the treasure!\n
-									Time: ${myTimeMinute}:${myTimeStamp}
+
 									;
 
-					width:${textHolder.width * 2};
+					width:${textHolder.width * 1.5};
 					color: rgb(0,0,0);
 					align: center;`
 				);
 	}
+
+
+	// if(gameStarted) {
+	// 	myTimeMinute = minute() - currentTime;		//well no ones gonna play more than 1hr.. so this is quick fix
+	// 	myTimeStamp = second();
+	//
+	// 	// if(myTimeStamp == 0){
+	// 	// 	myTimeMinute += 1
+	// 	// }
+	// 	// myTimeStamp = parseInt(myTimeStamp/1000, 2);
+	//
+	// }
+	// 	// Time: ${myTimeMinute}:${myTimeStamp} //took this out bc way too expensive
 }
+
+
 
 function followMyObject() {
   playerArrayClient.forEach((each) => {
     if (socket.id == each.id) {
       // console.log(world.camera)
-      world.camera.setPosition(each.getX(),each.getY()+3,each.getZ()+5);
+      world.camera.setPosition(each.getX(),each.getY()+3,each.getZ()+4);
       // console.log(each.rotationY,'!!!!')
       // console.log(world.camera);
       // console.log(world.camera.rotationY,'@@@');
       // world.camera.rotateY(each.rotationY)
 
 
-				if(gameStarted) {
-					myTimeMinute = minute() - currentTime;		//well no ones gonna play more than 1hr.. so this is quick fix
-					myTimeStamp = second();
 
-					// if(myTimeStamp == 0){
-					// 	myTimeMinute += 1
-					// }
-					// myTimeStamp = parseInt(myTimeStamp/1000, 2);
-
-				}
-				// console.log(myTimeMinute);
 
 
 
@@ -978,7 +1017,10 @@ socket.on('rotatedMyPlayer', function(data) {
     if (data.userId == each.id) {
       //console.log("client id " + each.id + " is rotating by " + data.yRotation)
       // each.children[0].spinY(data.yRotation);
-      each.spinY(data.yRotation);
+
+
+			//here
+      // each.spinY(data.yRotation);
 			// console.log(world.camera);
 			//
 			// world.scene.remove(world.scene.camera);
@@ -1039,6 +1081,7 @@ socket.on('disconnect', function(data) {
         j-=1;
       }
   }
+	playerNum = playerArrayClient.length
   //console.log(socket.id, 'good bye!');
   //console.log('number of players: ', playerArrayClient.length)
 

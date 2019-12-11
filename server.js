@@ -76,6 +76,7 @@ io.on('connect', (socket) => {
                                 yPos: each.yPos,
                                 zPos: each.zPos,
                                 userId: each.userId,
+                                yCurrentRotation: each.yCurrentRotation,
                                 nudgeAmount: each.nudgeAmount
                               });
     });
