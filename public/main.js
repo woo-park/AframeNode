@@ -15,12 +15,228 @@ function preload() {
 
 
 
-let world
+let world;
+
+
+let firstScreen;
+let tempBox;
+let tornado;
+function initScreen() {
+
+	firstScreen = new Plane({
+		side:'double',
+		red: 40, green: 40, blue: 40,
+		width: 10,
+		x:0, y:0, z:0,
+		height: 10
+	});
+	world.camera.cursor.addChild(firstScreen);
+
+	if(firstScreen) {		//just to ensure
+		firstScreen.tag.setAttribute('text',
+			    `value: Welcome! Here are some descriptions\n
+									Your only goal is to find the treasure\n
+									So look around how many are also online\n
+									And be the first one to find it!
+									;
+					width:${firstScreen.width / 10};
+					color: rgb(0,0,0);
+					align: center;`
+				);
+	}
+
+	//// create a plane to serve as a holder for our text
+	textHolder = new Plane({
+		side:'double',
+		red: 40, green: 40, blue: 40,
+		width: 3.5,
+		x:10, y:2, z:-10,
+		height: 2.5
+
+	});
+	world.camera.cursor.addChild(textHolder);
+
+
+	// tempBox = new Box({
+	// 							x:0, y:0, z:0,
+	// 							width:1, height: 2, depth: 1,
+	// 							red:255, green:0, blue:0
+	// 						});
+
+			tempBox = new OBJ({
+								asset: 'tornado_obj',
+								mtl: 'tornado_mtl',
+								x: 0,
+								y: 0,
+								z: 0,
+								rotationX:0,
+								rotationY:0,
+								rotationZ:0,
+								scaleX:0.5,
+								scaleY:0.5,
+								scaleZ:0.5
+						});
+	tempBox.myValue = 0;
+
+	world.add(tempBox);
+}
+let gameStarted = false;
+
+let action1 = true;
+let action2 = true;
+let action3 = true;
+let action4 = true;
+//
+// let amount1 = -0.03;
+// let amount2 = -0.03;
+// let amount3 = 0.03;
+// let amount4 = 0.03;
+let tempor = 1;
+let sequential_moving = () => {
+
+				// let sequence = async function() {
+				// 	let amount1 = -0.01;
+				// 	let amount2 = -0.01;
+				// 	let amount3 = 0.01;
+				// 	let amount4 = 0.01;
+				// 	let first = await new Promise((resolve, reject) => {
+				// 			// tempBox.spinY(1);
+				// 			if(action1 == true){
+				// 				tempBox.nudge(amount1,0,0);
+				// 				tempBox.spinY(1);
+				// 			}
+				//
+				//
+				// 			setTimeout(()=>{
+				// 					action1 = false;
+				// 					action2 = true;
+				// 					resolve('first finished');
+				// 					amount1 = 0;
+				// 			}, 1000)
+				// 	}).then((val) => console.log(val))
+				//
+				// 	let second = await new Promise((resolve, reject) => {
+				//
+				// 			// tempBox.spinZ(1)
+				// 			if (action2) {
+				// 					tempBox.nudge(0,0,amount2);
+				// 			}
+				//
+				//
+				// 			setTimeout(()=>{
+				// 					resolve('second finished');
+				// 					action2 = false;
+				// 					action3 = true;
+				// 					amount2 = 0;
+				// 			}, 1000)
+				//
+				// 	}).then((val) => console.log(val))
+				//
+				// 	let third = await new Promise((resolve, reject) => {
+				// 			// tempBox.spinY(1);
+				// 			// tempBox.nudge(-0.05,0,0);
+				// 			if (action3) {
+				// 				tempBox.nudge(amount3,0,0);
+				// 			}
+				//
+				//
+				// 			setTimeout(()=>{
+				// 					resolve('third finished');
+				// 					action3 = false;
+				// 					action4 = true;
+				// 					amount3 = 0;
+				// 			}, 1000)
+				// 	}).then((val) => console.log(val))
+				//
+				// 	let fourth = await new Promise((resolve, reject) => {
+				// 			// tempBox.spinY(1);
+				// 			// tempBox.nudge(-0.05,0,0);
+				// 			if (action4) {
+				// 				tempBox.nudge(0,0,amount4);
+				// 			}
+				//
+				// 			setTimeout(()=>{
+				// 					resolve('fourth finished');
+				// 					action4 = false;
+				// 					action1 = true;
+				// 					amount4 = 0;
+				// 			}, 1000)
+				// 	}).then((val) => console.log(val))
+				//
+				// }
+				// sequence();
+        let sequence = new Promise( (resolve, reject) => {      //center
+					tempBox.spinY(tempor);
+					tempBox.myValue += 1;
+
+
+					if(tempBox.myValue == 360) {
+						resolve('Success');
+						tempBox.myValue = 0;
+						tempor = tempor * -1;
+					}
+            // if(this.stem_finished) {
+            //     push();
+            //     noStroke();
+            //     fill(this.ran_color);
+            //     ellipseMode(CENTER);
+            //     ellipse(this.x, this.stem_height, this.center_radius, this.center_radius)
+            //     this.center_radius += this.radius_increment;
+            //     this.center_radius = constrain(this.center_radius, 10, 10 + this.ran_radius)
+            //     pop();
+            //     if(this.center_radius == (10 + this.ran_radius)) resolve('Success!');
+            // }
+        });
+				//
+        sequence.then((value) => {
+					console.log(tempBox.myValue)
+
+					tempBox.myValue += 1;
+					console.log(value)
+					// for (let i = 0; i < 30; i ++) {
+						tempBox.setScaleX((Math.random() * 2) + 0.3)
+					// }
+					console.log('spinning?')
+					console.log(tempBox.myValue)
+
+
+        // expected output: "Success!"          //width needs to vary
+        })
+				// .then(()=>{
+				// 	tempBox.nudge(0,1,0);
+				// 	console.log('hhuh')
+				//
+				//
+        // });
+    }
+
+
+
+setTimeout(()=>{
+	if (world.camera.cursor){
+		world.camera.cursor.removeChild(firstScreen);
+		gameStarted = true;
+	}
+}, 4000)
+
+
+// function timeTracker(timestamp){
+// 	console.log(timestamp,'tmp stamp');
+// 			timeTracker(timestamp);
+// }
+// // window.requestAnimationFrame(timeTracker);
+
+
+
+
+
 function setup() {
 	noCanvas();
   world = new World('VRScene');
   socket.emit('worldReady')
 
+	currentTime = minute();
+	currentSec = second();
 // world.camera.holder.setAttribute('wasd-controls','enabled:false');
 
 	// create a plane to serve as our "ground"
@@ -30,11 +246,12 @@ function setup() {
 	world.add(ground);
 
 
-	world.threeSceneReference.fog = new THREE.FogExp2( 0xffffff, 0.1)
+	// world.threeSceneReference.fog = new THREE.FogExp2( 0xffffff, 0.1)
 	// world.cursorPosition.x = '-200px';
-	world.setFlying(true);
+	// world.setFlying(true);
   console.log(playerArrayClient,'obj has not instantiated yet');
 
+	initScreen();
 }
 
 class Sensor {
@@ -123,7 +340,7 @@ let map2 = [
 	[1,3,3,5,3,3,3,3,3,3,3,1],
 	[1,1,1,1,1,1,1,1,1,1,1,1]
 ]
-map = map2;		//defines current map
+map = map2;	//defines current map
 
 let tileSize = 10;
 let worldSize = 144;
@@ -139,6 +356,7 @@ let containerMap;
 
 let playerArrayClient = [];
 document.addEventListener('DOMContentLoaded', function() {
+
 
 let container;
 
@@ -167,7 +385,7 @@ socket.on('init', function(data){
 			// e.setRed(random(255));
 		}
 	});
-  b.setGreen(green);
+  // b.setGreen(green);
   b.id = data.userId;
 
 });
@@ -192,6 +410,7 @@ let playerArrayServer;
 // })
 
 let loaded = false;
+let textHolder;
 socket.on('currentPlayers', function(data) {    //display current players
   // debugHelper();
   playerArrayServer = data.currentPlayers;
@@ -254,6 +473,39 @@ socket.on('currentPlayers', function(data) {    //display current players
         // followMyObject();
         world.add( container )
 
+
+				// 1.
+
+				// can add something to the cursor like this - > like a panel would be great
+
+				// let c = new OBJ({
+      	// 	asset: 'plane_obj',
+      	// 	mtl: 'plane_mtl',
+    		//   // x:each.xPos, y:each.yPos, z:each.zPos,
+        //   x:0, y:0, z:0,
+      	// 	rotationX:0,
+      	// 	rotationY:180,
+      	// 	rotationZ:0,
+      	// 	scaleX:0.005,
+      	// 	scaleY:0.007,
+      	// 	scaleZ:0.002,
+      	// 	clickFunction: function(e) {
+      	// 		// e.setRed(random(255));
+      	// 	}
+      	// });
+				//
+				// // c.setPosition(0,-3,-5)
+				// world.camera.cursor.addChild(c);
+				console.log(world.camera.holder.object3D.parent,'This is camera holder parent')
+
+
+
+				//for displaying how many players online
+				playerNum = playerArrayClient.length;
+
+
+
+
     }
   });
   if (playerArrayClient.length > 0) {
@@ -310,6 +562,11 @@ function drawMap() {
 					scaleY:2.0,
 					scaleZ:2.0
       });
+
+
+
+
+
       let bush1 = new OBJ({
 					asset: 'bush1_obj',
 					mtl: 'bush1_mtl',
@@ -397,7 +654,53 @@ let pushthis = false;
 let pressed = false
 var okToMove = false;
 let objectAhead
+let y;
+let a;
+
+let directionVec3;
+function directionVec(){
+	let tempBox = new Box({
+                x:10, y:10, z:10,
+                width:1, height: 2, depth: 1,
+                red:255, green:0, blue:0
+              });
+
+  world.add(tempBox);
+	console.log(tempBox)
+	directionVec3 = new THREE.Vector3(tempBox.getWorldPosition.get);
+	// console.log(directionVec3)
+}
+
+
+
+// function step(timestamp) {		//doesn't work animore
+// 	if(!start) start = timestamp;
+// 	let progress = timestamp - start;	//since the time timestamp began
+// 	// addFeathers();
+// 	if (progress > 80) {
+// 		// alert(timestamp)		//timestamp is given
+// 		// alert(progress)
+// 		// alert(containerPrimitives)
+//
+// 		window.requestAnimationFrame(step);
+// 	}
+// }
+// window.requestAnimationFrame(step);
+
+let myTimeMinute = 0;
+let myTimeStamp = 0;
+let currentTime;
+let currentSec;
 function draw() {
+// directionVec();
+
+
+
+		// a = new THREE.Vector3(0,5,0);			//for some reason 5 is looking down , -5 is looking up , x - 50 is left corner , make x default 0, z -> to look at little front
+		// world.camera.holder.object3D.lookAt(a);
+		y += 0.1
+
+
     let changed = false;
 
     if(loaded == true) {
@@ -413,7 +716,9 @@ function draw() {
             // console.log(objectAhead,'obj ahead');
           }});
       }
+
     }
+
 
 
 
@@ -509,11 +814,15 @@ function draw() {
 
   if(playerArrayClient.length > 0) {
     followMyObject();     //updates camera live
+			sequential_moving();
   }
+
 } // end of draw
+
 
 function keyPressed(){
   pressed = true;
+
 }
 
 function keyReleased(){
@@ -609,8 +918,26 @@ socket.on('movedMyPlayer', function(data) {
   });
 });
 
+//
 
 
+
+
+let playerNum = 0;
+function displayTextPanel() {
+	if(textHolder) {
+		textHolder.tag.setAttribute('text',
+					`value: Number of Players Online: ${playerNum}\n
+									Find the treasure!\n
+									Time: ${myTimeMinute}:${myTimeStamp}
+									;
+
+					width:${textHolder.width * 2};
+					color: rgb(0,0,0);
+					align: center;`
+				);
+	}
+}
 
 function followMyObject() {
   playerArrayClient.forEach((each) => {
@@ -621,6 +948,24 @@ function followMyObject() {
       // console.log(world.camera);
       // console.log(world.camera.rotationY,'@@@');
       // world.camera.rotateY(each.rotationY)
+
+
+				if(gameStarted) {
+					myTimeMinute = minute() - currentTime;		//well no ones gonna play more than 1hr.. so this is quick fix
+					myTimeStamp = second();
+
+					// if(myTimeStamp == 0){
+					// 	myTimeMinute += 1
+					// }
+					// myTimeStamp = parseInt(myTimeStamp/1000, 2);
+
+				}
+				// console.log(myTimeMinute);
+
+
+
+
+				displayTextPanel();
     }
   });
 }
@@ -634,10 +979,25 @@ socket.on('rotatedMyPlayer', function(data) {
       //console.log("client id " + each.id + " is rotating by " + data.yRotation)
       // each.children[0].spinY(data.yRotation);
       each.spinY(data.yRotation);
-      // world.camera.rotateY(data.yRotation);
+			// console.log(world.camera);
+			//
+			// world.scene.remove(world.scene.camera);
+
+
+
+			// console.log(each,'EACH')
+			// world.camera.setPosition(each.getX(),each.getY()+3,each.getZ()+10);
+
+			// !important!
+			// world.camera.rotateY(data.yRotation * 0.5);
+
+
 			// world.camera.holder.rotationObj.y += 1;
 			// world.VRScene.rotateY += 1;
+
 			// world.el.components.camera.camera.rotation.y += 1
+
+
       //possibly have to set here again????????
       // socket.emit('sendBack_newPos', {
       //   newPosX:each.getWorldPosition().x,

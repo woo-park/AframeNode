@@ -1928,8 +1928,15 @@ function Camera() {
 	this.rotationY = 0;
 	this.rotationZ = 0;
 
+
 	// set controls on camera
-	this.holder.setAttribute('look-controls', '');
+
+//!important!
+	///turned this off
+	// this.holder.setAttribute('look-controls', '');
+
+
+
 	this.setWASD = function(flying) {
 		this.holder.setAttribute('wasd-controls', 'fly: ' + flying);
 	}
