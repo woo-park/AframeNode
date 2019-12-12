@@ -64,7 +64,7 @@ let playerArrayServer;
 let loaded = false;
 let textHolder;
 
-
+let playerNum = 0;
 
 let world;
 
@@ -222,6 +222,7 @@ world.camera.holder.setAttribute('wasd-controls','enabled:false');
   console.log(playerArrayClient,'obj has not instantiated yet');
 
 	initScreen();
+
 }
 
 class Sensor {
@@ -321,6 +322,49 @@ socket.on('currentPlayers', function(data) {
         container.addChild(b);
         container.id = b.id
 
+
+				let myobj = []
+
+
+				container.loadup = function(){
+					   let temp_myobj = new OBJ({
+		       		asset: 'ghost2_obj',
+		       		mtl: 'ghost2_mtl',
+		     		  // x:each.xPos, y:each.yPos, z:each.zPos,
+		           x:0, y:0, z:0.5,
+		       		rotationX:-60,
+		       		rotationY:180,
+		       		rotationZ:0,
+		       		scaleX:0.02,
+		       		scaleY:0.02,
+		       		scaleZ:0.03,
+		       	});
+						// myobj.push(temp_myobj);
+						// if (container.getChildren().length > 4){
+						// 		console.warn(container.getChildren().length)
+
+							container.addChild(temp_myobj);
+							console.warn('loading?')
+
+
+						container.move = function(){
+							temp_myobj.nudge(0,0,-0.5);
+							if (temp_myobj.z < -5){
+								container.removeChild(temp_myobj);
+								for (let i = 2; i < container.getChildren().length - 1; i ++) {
+									container.removeChild(container.getChildren()[i]);
+								}
+
+								loaded_bull = false;
+								console.log('hhhhh')
+
+							}
+							console.warn(container.getChildren().length)
+
+						}
+				}
+
+
         playerArrayClient.push(container)
         // followMyObject();
         world.add( container )
@@ -335,11 +379,13 @@ socket.on('currentPlayers', function(data) {
     drawMap();
     sensor = new Sensor();
     loaded = true;
+		// playerArrayClient.forEach((each) => {
+		// 		projectiles_temp = new Projectile(each);
+		// })
   }
-
 });
 
-
+let projectiles_temp
 
 
 function drawMap() {
@@ -439,21 +485,6 @@ function drawMap() {
 }
 
 
-function mousePressed() {
-  debugHelper();
-  return false;
-}
-
-function debugHelper() {
-  socket.emit('debug');
-  playerArrayClient.forEach((each, index) => {
-    console.log(`player${index}, x: ${each.getX()}, z: ${each.getZ()}, rotated: ${each.rotationY}`);
-  });
-  // console.log(playerArrayClient[0].rotationY,'playerArrayClient');
-
-}
-//major problem =-=== 1 is overwriting 0// don't know where that is happening
-
 
 
 let pushthis = false;
@@ -476,8 +507,6 @@ function directionVec(){
 	directionVec3 = new THREE.Vector3(tempBox.getWorldPosition.get);
 	// console.log(directionVec3)
 }
-
-
 
 // function step(timestamp) {		//doesn't work animore
 // 	if(!start) start = timestamp;
@@ -508,7 +537,6 @@ function draw() {
 		// world.camera.holder.object3D.lookAt(a);
 		y += 0.1
 
-
     let changed = false;
 
     if(loaded == true) {
@@ -520,16 +548,10 @@ function draw() {
             // console.log(sensor,'sensor')
             // console.log(sensor.getEntityInFrontOfUser());
             objectAhead = sensor.getEntityInFrontOfUser();
-
             // console.log(objectAhead,'obj ahead');
           }});
       }
-
     }
-
-
-
-
 
     if (keyIsDown(LEFT_ARROW) && pressed) {
       // rotate this player to the left
@@ -539,7 +561,6 @@ function draw() {
 			spinPlayer(1)
     } else if (keyIsDown(RIGHT_ARROW) && pressed) {
       //actually rotate the player
-
 
       changed = true;
       socket.emit('rotateMyPlayer', {playerId: socket.id, direction:keyCode});  //right
@@ -562,7 +583,7 @@ function draw() {
         nudgeForward(0.05);
 				world.moveUserForward(0.05);
       }
-      // socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //up
+
     } else if ( keyIsDown(DOWN_ARROW) && pressed) {
 
       okToMove = true;
@@ -575,13 +596,14 @@ function draw() {
       }
 
       if (okToMove) {
-        // world.moveUserForward(0.1);
         changed = true;
         nudgeForward(-0.05);
-
       }
 
-      // socket.emit('moveMyPlayer', {playerId: socket.id, direction:keyCode}); //down
+
+
+
+
     }
 
     //circling around
@@ -607,18 +629,9 @@ function draw() {
               userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
               yCurrentRotation:each.rotationY
             });
-            // console.log(each.getRotationY,'1')    //this one returns null
+
             console.log(each.rotationY,'2')
-
-          // each.children[0].setPosition(data.xPos,data.yPos,data.zPos) //
-          // each.children[1].setPosition(data.xPos,data.yPos,data.zPos) //
-          // each.setPosition(data.xPos,data.yPos,data.zPos) //
-          // each.nudge(0,0,-0.1);
-          // console.log(each.rotationY)
-          // incrementing from the serversid
         }
-        // 'mark here'
-
       });
     }
 
@@ -627,23 +640,74 @@ function draw() {
 			sequential_moving();
   }
 
+	// if (projectiles.length > 0) {
+	// 	// alert('exist')
+	// 		projectilesMove();
+	// }
+
+	//
+	// if (mouseIsPressed) {
+
+			// playerArrayClient.forEach( (each) => {
+			// 	if (each.id == socket.id) {
+
+					// projectiles[0].move();
+					if(yes){
+
+						// projectiles_temp.move();
+					}
+
+					// projectiles.push( projectiles_temp );
+
+			// 	}	// end of validating
+			// })
+
+
+	// }
+	if (mouseIsPressed) {
+		// load up
+		loadsetup();
+	}
+
+
+	//ongoing default
+	if (loaded_bull) {
+		playerArrayClient.forEach((each) => {
+			if (socket.id == each.id) {
+				each.move();
+			}
+		});
+
+	}
+
 } // end of draw
+
+let loaded_bull = false;
+
+function loadsetup(){
+	playerArrayClient.forEach((each) => {
+    if (socket.id == each.id) {
+			each.loadup();
+		}
+	});
+	loaded_bull = true;
+}
+
 
 let myFrameRate = '';
 function keyPressed(){
   pressed = true;
 	myFrameRate = Math.floor(frameRate());
+	yes = true;
 }
 
 function keyReleased(){
   pressed = false;
 	myFrameRate = '';
+	// yes = false;
 }
 
-//receive event from the server- that updataes all the coordinates and rot of the players
-//do not move this client() io.socket.broadcast - bc the player might nudge back to the ---
-
-socket.on('broadcast', function(data) {
+socket.on('broadcast', function(data) {			//recieves the coord and rotation - update live
   playerArrayClient.forEach((each) => {
     if (data.userId == each.id) {
        // each.setPosition(data.xPos,data.yPos,data.zPos)
@@ -653,17 +717,11 @@ socket.on('broadcast', function(data) {
         each.setPosition(data.xPos,data.yPos,data.zPos)
 				each.rotateY(data.yCurrentRotation);					///chek
       }
-
     }
-
   });
-
 });
-//possibly
-//dropped messgage
 
-//periodically pings the positions
-//draw, settimeout - couple hundred frames
+
 function nudgeForward(nudgeAmount){
   playerArrayClient.forEach((each) => {
     if (socket.id == each.id) {
@@ -697,7 +755,6 @@ function nudgeForward(nudgeAmount){
   });
 }
 
-
 function spinPlayer(spinAmount) {
 	playerArrayClient.forEach((each) => {
 		if (socket.id == each.id) {
@@ -706,48 +763,8 @@ function spinPlayer(spinAmount) {
 	});
 }
 
-//NOT USING
-socket.on('movedMyPlayer', function(data) {
-  playerArrayClient.forEach((each) => {
-    if (data.userId == each.id) {
 
-
-
-
-
-        //!important  // should this go 'here mark'
-        socket.emit('sendBack_newPos', {
-          newPosX:each.getWorldPosition().x,
-          newPosY:each.getWorldPosition().y,
-          newPosZ:each.getWorldPosition().z,
-          userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
-          yCurrentRotation:each.rotationY
-        });
-        // console.log(each.getRotationY,'1')    //this one returns null
-        console.log(each.rotationY,'2')
-
-      // each.children[0].setPosition(data.xPos,data.yPos,data.zPos) //
-      // each.children[1].setPosition(data.xPos,data.yPos,data.zPos) //
-      // each.setPosition(data.xPos,data.yPos,data.zPos) //
-      // each.nudge(0,0,-0.1);
-      // console.log(each.rotationY)
-      // incrementing from the serversid
-    }
-    // 'mark here'
-
-  });
-});
-
-//
-
-
-
-
-let playerNum = 0;
 function displayTextPanel() {
-
-	// console.log(myTimeMinute);
-
 	if(textHolder) {
 		textHolder.tag.setAttribute('text',
 					`value: Number of Players Online: ${playerNum}\n
@@ -762,30 +779,114 @@ function displayTextPanel() {
 	}
 }
 
-
-
-
-
 function followMyObject() {
   playerArrayClient.forEach((each) => {
     if (socket.id == each.id) {
-      // console.log(world.camera)
       world.camera.setPosition(each.getX(),each.getY()+3,each.getZ()+4);
-      // console.log(each.rotationY,'!!!!')
-      // console.log(world.camera);
-      // console.log(world.camera.rotationY,'@@@');
-      // world.camera.rotateY(each.rotationY)
 
-
-
-
-
-
-
-				displayTextPanel();
+			displayTextPanel();
     }
   });
 }
+
+
+class Projectile {
+	constructor(each) {
+		console.log(each,'eachhhhhhh')
+		// let userPosition = each.getWorldPosition()
+		//
+		// this.myContainer = new Container3D({
+		// 	x: userPosition.x,
+		// 	y: userPosition.y,
+		// 	z: userPosition.z
+		// });
+
+		this.myContainer = new Container3D({
+			x: each.xPos,
+			y: each.yPos + 3,
+			z: each.zPos
+		})
+
+		world.add(this.myContainer);
+
+		this.myObject = new Box({
+					x:0, y:1, z:0,
+					width:1, height: 1, depth: 1,
+					red:random(0), green:random(0), blue:random(0)
+				});
+
+		this.myContainer.addChild(this.myObject);
+	}
+
+	move() {
+		console.warn('BEING CALLED');
+		console.warn(this.myObject.z,'1');
+		this.myObject.nudge(0,0,-1)
+		console.warn(this.myObject.z,'2');
+	}
+
+
+}// end of class
+
+
+
+let yes = false;
+let projectiles = [];
+function mousePressed() {
+
+	debugHelper();
+	return false;
+}
+
+
+function projectilesMove() {
+	for (var i = 0; i < projectiles.length; i++) {
+		// projectiles[i].move();
+
+
+
+		// 	// get WORLD position for this projectile	//my cube
+		// let projectilePosition = projectiles[i].myObject.getWorldPosition();
+		//
+		// if (projectilePosition.x > 5 || projectilePosition.x < -5 || 	projectilePosition.z > 5 || projectilePosition.z < -5) {
+		// world.remove(projectiles[i].myContainer);
+		// 	projectiles.splice(i, 1);
+		// 	i--;
+		// 	continue;
+		// }
+	}
+}
+
+
+
+
+
+function debugHelper() {
+  socket.emit('debug');
+  playerArrayClient.forEach((each, index) => {
+    console.log(`player${index}, x: ${each.getX()}, z: ${each.getZ()}, rotated: ${each.rotationY}`);
+  });
+  // console.log(playerArrayClient[0].rotationY,'playerArrayClient');
+
+}
+//major problem =-=== 1 is overwriting 0// don't know where that is happening
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function emitEvent(arg,obj,time = 1000,) {
@@ -798,8 +899,6 @@ function emitEvent(arg,obj,time = 1000,) {
   }
   send = false;
 }
-
-
 
 // https://www.npmjs.com/package/aframe-look-at-component
 
@@ -819,10 +918,7 @@ socket.on('disconnect', function(data) {
 	playerNum = playerArrayClient.length
   //console.log(socket.id, 'good bye!');
   //console.log('number of players: ', playerArrayClient.length)
-
 });
-
-
 
 
 /*********************************************************/
