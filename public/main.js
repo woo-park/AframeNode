@@ -136,22 +136,22 @@ let sequential_moving = () => {
         });
 
         sequence.then((value) => {
-					console.log(tempBox.myValue)
+					// console.log(tempBox.myValue)
 
 					tempBox.myValue += 1;
-					console.log(value)
+					// console.log(value)
 					// for (let i = 0; i < 30; i ++) {
 						tempBox.setScaleX((Math.random() * 2) + 0.3)
 					// }
-					console.log('spinning?')
-					console.log(tempBox.myValue)
+					// console.log('spinning?')
+					// console.log(tempBox.myValue)
 
 
         })
     }
 
 setTimeout(()=>{
-	console.log(world.camera.cursor.children.length,'exists?');
+	// console.log(world.camera.cursor.children.length,'exists?');
 	if (world.camera.cursor.children.length > 1){
 		world.camera.cursor.removeChild(firstScreen);
 		gameStarted = true;
@@ -232,7 +232,7 @@ world.camera.holder.setAttribute('wasd-controls','enabled:false');
 
 
 	world.threeSceneReference.fog = new THREE.FogExp2( 0xffffff, 0.1)
-  console.log(playerArrayClient,'obj has not instantiated yet');
+  // console.log(playerArrayClient,'obj has not instantiated yet');
 
 	initScreen();
 
@@ -290,13 +290,13 @@ socket.on('currentPlayers', function(data) {
     for (let i = 0; i < playerArrayClient.length; i++) {
       if (each.userId === playerArrayClient[i].id) {
         dup = true;
-        console.log("found a dup!");
+        // console.log("found a dup!");
         break;
       }
     }
 
     if (!dup) {
-        console.dir(each);
+        // console.dir(each);
         let b = new OBJ({
       		asset: 'ghost2_obj',
       		mtl: 'ghost2_mtl',
@@ -316,9 +316,9 @@ socket.on('currentPlayers', function(data) {
         //!set the pos here
         container = new Container3D({x:each.xPos, y:each.yPos, z:each.zPos});
         //testing
-        console.log(each.yCurrentRotation,'retrived??');
+        // console.log(each.yCurrentRotation,'retrived??');
         container.spinY(each.yCurrentRotation);
-        console.log(container.rotationY,'applied??')
+        // console.log(container.rotationY,'applied??')
         // {x:each.getX(), y:each.getY(), z:each.getZ()}
 
         // add in a little "sensor" in front of the shark we will have the shark
@@ -357,7 +357,7 @@ socket.on('currentPlayers', function(data) {
 						// 		console.warn(container.getChildren().length)
 
 							container.addChild(temp_myobj);
-							console.warn('loading?')
+							// console.warn('loading?')
 
 
 						container.move = () => {
@@ -369,10 +369,10 @@ socket.on('currentPlayers', function(data) {
 								}
 
 								container.loaded_bull = false;
-								console.log('hhhhh')
+								// console.log('hhhhh')
 
 							}
-							console.warn(container.getChildren().length)
+							// console.warn(container.getChildren().length)
 
 						}
 				}
@@ -382,7 +382,7 @@ socket.on('currentPlayers', function(data) {
         // followMyObject();
         world.add( container )
 
-				console.log(world.camera.holder.object3D.parent,'This is camera holder parent')
+				// console.log(world.camera.holder.object3D.parent,'This is camera holder parent')
 
 				//for displaying how many players online
 				playerNum = playerArrayClient.length;
@@ -483,7 +483,7 @@ function drawMap() {
           height: 1.5,
           red: random(100,240), green:random(100,240), blue:random(100,240),
           clickFunction: function(t) {
-            console.log("Clicked");
+            // console.log("Clicked");
             //Ideally we want to move the winning screen
           }
         });
@@ -508,19 +508,6 @@ let objectAhead
 let y;
 let a;
 
-let directionVec3;
-function directionVec(){
-	let tempBox = new Box({
-                x:10, y:10, z:10,
-                width:1, height: 2, depth: 1,
-                red:255, green:0, blue:0
-              });
-
-  world.add(tempBox);
-	console.log(tempBox)
-	directionVec3 = new THREE.Vector3(tempBox.getWorldPosition.get);
-	// console.log(directionVec3)
-}
 
 // function step(timestamp) {		//doesn't work animore
 // 	if(!start) start = timestamp;
@@ -568,7 +555,7 @@ function draw() {
       }
     }
 		if (objectAhead && objectAhead.distance < 3.25 && objectAhead.object.el.object3D.el.object3D.userData.treasure) {
-			console.warn('found, game over')
+			// console.warn('found, game over')
 			// okToMove = false;
 			// nudgeForward(-0.1);    //hit the wall - nudge back
 			ending = true;
@@ -592,7 +579,7 @@ function draw() {
 
       //!important - made it  0.25 to 3.25 bc 3 is the distance bt camera and object
       if (objectAhead && objectAhead.distance < 3.25 && objectAhead.object.el.object3D.el.object3D.userData.solid) {
-        console.log("Blocked!");
+        // console.log("Blocked!");
         okToMove = false;
         nudgeForward(-0.1);    //hit the wall - nudge back
       }
@@ -610,7 +597,7 @@ function draw() {
 
       // if there is an object, it is close and it is solid, prevent motion
       if (objectAhead && objectAhead.distance < 0.25 && objectAhead.object.el.object3D.el.object3D.userData.solid) {
-        console.log("Blocked!");
+        // console.log("Blocked!");
         okToMove = false;
         nudgeForward(0.1);
       }
@@ -650,7 +637,7 @@ function draw() {
               yCurrentRotation:each.rotationY
             });
 
-            console.log(each.rotationY,'2')
+            // console.log(each.rotationY,'2')
         }
       });
     }
@@ -775,8 +762,8 @@ function nudgeForward(nudgeAmount){
       let changedPosY = each.getY()
       let changedPosZ = each.getZ()
 
-      console.log(changedPosX +' # '+ changedPosY +' # '+ changedPosZ);
-      console.log(each.getWorldPosition().x + ' '+ each.getWorldPosition().y+' '+each.getWorldPosition().z )
+      // console.log(changedPosX +' # '+ changedPosY +' # '+ changedPosZ);
+      // console.log(each.getWorldPosition().x + ' '+ each.getWorldPosition().y+' '+each.getWorldPosition().z )
     }
   });
 }
@@ -818,7 +805,7 @@ function followMyObject() {
 
 class Projectile {
 	constructor(each) {
-		console.log(each,'eachhhhhhh')
+		// console.log(each,'eachhhhhhh')
 		// let userPosition = each.getWorldPosition()
 		//
 		// this.myContainer = new Container3D({
@@ -845,10 +832,10 @@ class Projectile {
 	}
 
 	move() {
-		console.warn('BEING CALLED');
-		console.warn(this.myObject.z,'1');
+		console.log('BEING CALLED');
+		// console.warn(this.myObject.z,'1');
 		this.myObject.nudge(0,0,-1)
-		console.warn(this.myObject.z,'2');
+		// console.warn(this.myObject.z,'2');
 	}
 
 

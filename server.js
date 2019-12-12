@@ -80,10 +80,10 @@ io.on('connect', (socket) => {
     });
   });
   //!important = this is what's setting the position of users - both initial and changed position
-  console.log(playerArrayServer,'playerArrayServer -> before sending out Position & Rotation');
+  // console.log(playerArrayServer,'playerArrayServer -> before sending out Position & Rotation');
 
   socket.on('debug', function(data) {
-    console.log(playerArrayServer,'playerArrayServer -> before sending out Position & Rotation');
+    // console.log(playerArrayServer,'playerArrayServer -> before sending out Position & Rotation');
   })
 
 
