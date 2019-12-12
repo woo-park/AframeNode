@@ -22,9 +22,9 @@ io.on('connect', (socket) => {
   console.log("player has connected");
   console.log(socket.id, 'connected');
 
-  let initX = Math.floor(Math.random() * 5)
+  let initX = Math.floor(Math.random() * 10)
   let initY = 0;
-  let initZ = -1;
+  let initZ = Math.floor(Math.random() * 10);
 
   playerArrayServer.push(new Player(initX, initY, initZ,  socket.id, 0));
 

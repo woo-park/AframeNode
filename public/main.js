@@ -40,16 +40,16 @@ let map3 = [
 	[1,1,1,1,1,1,1,1,1,1,1,1],
 	[1,3,3,3,3,3,3,0,3,0,5,1],
 	[1,0,3,0,0,3,0,0,0,0,3,1],
+	[1,0,3,0,0,0,0,0,3,0,0,1],
+	[1,0,3,0,3,3,0,0,3,0,3,1],
 	[1,0,3,0,0,0,3,0,3,0,0,1],
-	[1,0,3,0,3,0,0,0,3,0,3,1],
-	[1,0,3,0,3,3,3,0,3,0,0,1],
 	[1,0,3,0,3,3,3,0,3,0,3,1],
 	[1,0,0,0,3,0,0,0,0,0,0,1],
 	[1,3,0,0,3,0,0,0,0,3,0,1],
 	[1,3,0,0,3,0,0,0,0,3,0,1],
 	[1,3,0,0,0,0,0,0,0,3,0,1],
-	[1,3,3,5,3,3,3,3,3,3,0,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1]
+	[1,0,3,0,3,3,3,3,3,3,0,1],
+	[5,1,1,1,1,1,1,1,1,1,1,1]
 ]
 map = map3;	//defines current map
 
@@ -100,7 +100,7 @@ function initScreen() {
 		red: 180, green: 180, blue: 180,
 		opacity:0.8,
 		width: 4.5,
-		x:10, y:2, z:-10,
+		x:13, y:7.5, z:-10,
 		height: 2.5,
 	});
 	world.camera.cursor.addChild(textHolder);
@@ -158,9 +158,9 @@ setTimeout(()=>{
 	}
 
 
-	setTimeout(()=>{
-		ending = true;
-	}, 10000)
+	// setTimeout(()=>{
+	// 	ending = true;
+	// }, 10000)
 }, 2000)
 
 
@@ -169,12 +169,19 @@ setTimeout(()=>{
 function trackTime(){
 	myTimeMinute = minute() - currentTime;		//well no ones gonna play more than
 	myTimeStamp = second();
+
+
 }
 
 let ending = false;
 let endScreen;
+
+let mymin;
+let mysec;
 function endingScreen(){
 	trackTime();
+
+
 
 	endScreen = new Plane({
 		red: 180, green: 180, blue: 180,
@@ -185,22 +192,28 @@ function endingScreen(){
 	});
 	world.camera.cursor.addChild(endScreen);
 
+	mymin = myTimeMinute;
+	 mysec = myTimeStamp;
+
 	if(endScreen) {		//just to ensure
 		endScreen.tag.setAttribute('text',
 					`value: Found Treasure!\n
-									Time you spent: ${myTimeMinute}:${myTimeStamp}
+									Time you spent: ${mymin}:${mysec}
 									;
 					width:4;
 					color: rgb(0,0,0);
 					align: center;`
 				);
 	}
+
+
 }
 
 
 
 
-
+let treasure;
+let treasureBox;
 
 function setup() {
 	noCanvas();
@@ -347,7 +360,7 @@ socket.on('currentPlayers', function(data) {
 							console.warn('loading?')
 
 
-						container.move = function(){
+						container.move = () => {
 							temp_myobj.nudge(0,0,-0.5);
 							if (temp_myobj.z < -5){
 								container.removeChild(temp_myobj);
@@ -355,7 +368,7 @@ socket.on('currentPlayers', function(data) {
 									container.removeChild(container.getChildren()[i]);
 								}
 
-								loaded_bull = false;
+								container.loaded_bull = false;
 								console.log('hhhhh')
 
 							}
@@ -450,7 +463,7 @@ function drawMap() {
       //   container.addChild(block);
       // }
       else if ( map[row][col] == 5 ) {
-        var treasure = new OBJ({
+        treasure = new OBJ({
       		asset: 'treasure',
       		mtl: 'treasure_mtl',
       		x: xPos,
@@ -462,7 +475,7 @@ function drawMap() {
       		scaleY:5,
       		scaleZ:5,
       	});
-        var treasureBox = new Box({
+        treasureBox = new Box({
           x:xPos, y:3, z:zPos,
           opacity: 0.1,
           width: tileSize/4,
@@ -475,6 +488,7 @@ function drawMap() {
           }
         });
         treasureBox.tag.object3D.userData.solid = true;
+				treasureBox.tag.object3D.userData.treasure = true;
         containerMap.addChild(treasure);
         containerMap.addChild(treasureBox);
       }
@@ -531,6 +545,7 @@ function draw() {
 		if (ending) {
 			endingScreen();
 			ending = false;
+
 		}
 
 		// a = new THREE.Vector3(0,5,0);			//for some reason 5 is looking down , -5 is looking up , x - 50 is left corner , make x default 0, z -> to look at little front
@@ -552,7 +567,12 @@ function draw() {
           }});
       }
     }
-
+		if (objectAhead && objectAhead.distance < 3.25 && objectAhead.object.el.object3D.el.object3D.userData.treasure) {
+			console.warn('found, game over')
+			// okToMove = false;
+			// nudgeForward(-0.1);    //hit the wall - nudge back
+			ending = true;
+		}
     if (keyIsDown(LEFT_ARROW) && pressed) {
       // rotate this player to the left
 
@@ -638,6 +658,17 @@ function draw() {
   if(playerArrayClient.length > 0) {
     followMyObject();     //updates camera live
 			sequential_moving();
+
+
+				playerArrayClient.forEach((each) => {
+					if (each.loaded_bull) {
+						if (socket.id == each.id) {
+							each.move();
+						}
+					}
+				});
+
+
   }
 
 	// if (projectiles.length > 0) {
@@ -671,26 +702,21 @@ function draw() {
 
 
 	//ongoing default
-	if (loaded_bull) {
-		playerArrayClient.forEach((each) => {
-			if (socket.id == each.id) {
-				each.move();
-			}
-		});
 
-	}
 
 } // end of draw
 
-let loaded_bull = false;
+// let loaded_bull = false;
 
 function loadsetup(){
 	playerArrayClient.forEach((each) => {
     if (socket.id == each.id) {
 			each.loadup();
+
+			each.loaded_bull = true;
 		}
 	});
-	loaded_bull = true;
+
 }
 
 
