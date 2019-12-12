@@ -76,7 +76,7 @@ function initScreen() {
 
 	firstScreen = new Plane({
 		red: 180, green: 180, blue: 180,
-		opacity:0.8,
+		opacity:0.98,
 		width: 7,
 		x:0, y:0, z:-1,
 		height: 7
@@ -85,10 +85,13 @@ function initScreen() {
 
 	if(firstScreen) {		//just to ensure
 		firstScreen.tag.setAttribute('text',
-			    `value: Welcome! Here are some descriptions\n
-									Your only goal is to find the treasure\n
-									So look around how many are also online\n
-									And be the first one to find it!
+			    `value: Hi! \n
+                  Welcome to Treasure Hunt!\n
+									The goal is to find the treasure\n
+                  It's hidden in the forest, \n
+									so look around using Arrow keys \n
+                  Also check out who else is looking for the treasure\n
+									Be the first one to find it!
 									;
 					width:4;
 					color: rgb(0,0,0);
@@ -156,12 +159,10 @@ setTimeout(()=>{
 		world.camera.cursor.removeChild(firstScreen);
 		gameStarted = true;
 	}
-
-
 	// setTimeout(()=>{
 	// 	ending = true;
 	// }, 10000)
-}, 2000)
+}, 8000)
 
 
 
@@ -197,8 +198,10 @@ function endingScreen(){
 
 	if(endScreen) {		//just to ensure
 		endScreen.tag.setAttribute('text',
-					`value: Found Treasure!\n
-									Time you spent: ${mymin}:${mysec}
+					`value: Treasure is gold!!\n
+									That took you ${mymin} minutes and ${mysec}sec!\n
+                  Wanna try again?
+                  Reload...?
 									;
 					width:4;
 					color: rgb(0,0,0);
@@ -328,7 +331,7 @@ socket.on('currentPlayers', function(data) {
           x: 0,
           y: 0,
           z: -5,
-          opacity: 0.2
+          opacity: 0.0
         });
         container.addChild(sensorBox);
 
@@ -361,8 +364,8 @@ socket.on('currentPlayers', function(data) {
 
 
 						container.move = () => {
-							temp_myobj.nudge(0,0,-0.5);
-							if (temp_myobj.z < -5){
+							temp_myobj.nudge(0,0,-0.3);
+							if (temp_myobj.z < -10){
 								container.removeChild(temp_myobj);
 								for (let i = 2; i < container.getChildren().length - 1; i ++) {
 									container.removeChild(container.getChildren()[i]);
@@ -606,11 +609,6 @@ function draw() {
         changed = true;
         nudgeForward(-0.05);
       }
-
-
-
-
-
     }
 
     //circling around
@@ -644,56 +642,23 @@ function draw() {
 
   if(playerArrayClient.length > 0) {
     followMyObject();     //updates camera live
-			sequential_moving();
+		sequential_moving();
 
-
-				playerArrayClient.forEach((each) => {
-					if (each.loaded_bull) {
-						if (socket.id == each.id) {
-							each.move();
-						}
-					}
-				});
-
-
+		playerArrayClient.forEach((each) => {
+			if (each.loaded_bull) {
+				if (socket.id == each.id) {
+					each.move();
+				}
+			}
+		});
   }
 
-	// if (projectiles.length > 0) {
-	// 	// alert('exist')
-	// 		projectilesMove();
-	// }
-
-	//
-	// if (mouseIsPressed) {
-
-			// playerArrayClient.forEach( (each) => {
-			// 	if (each.id == socket.id) {
-
-					// projectiles[0].move();
-					if(yes){
-
-						// projectiles_temp.move();
-					}
-
-					// projectiles.push( projectiles_temp );
-
-			// 	}	// end of validating
-			// })
-
-
-	// }
 	if (mouseIsPressed) {
 		// load up
 		loadsetup();
 	}
 
-
-	//ongoing default
-
-
 } // end of draw
-
-// let loaded_bull = false;
 
 function loadsetup(){
 	playerArrayClient.forEach((each) => {
@@ -703,7 +668,6 @@ function loadsetup(){
 			each.loaded_bull = true;
 		}
 	});
-
 }
 
 
@@ -758,9 +722,9 @@ function nudgeForward(nudgeAmount){
       // nudge the container toward this position
       each.nudge(xDiff * d, yDiff * d, zDiff * d);
 
-      let changedPosX = each.getX()
-      let changedPosY = each.getY()
-      let changedPosZ = each.getZ()
+      let changedPosX = each.getX();
+      let changedPosY = each.getY();
+      let changedPosZ = each.getZ();
 
       // console.log(changedPosX +' # '+ changedPosY +' # '+ changedPosZ);
       // console.log(each.getWorldPosition().x + ' '+ each.getWorldPosition().y+' '+each.getWorldPosition().z )
@@ -842,7 +806,6 @@ class Projectile {
 }// end of class
 
 
-
 let yes = false;
 let projectiles = [];
 function mousePressed() {
@@ -851,24 +814,6 @@ function mousePressed() {
 	return false;
 }
 
-
-function projectilesMove() {
-	for (var i = 0; i < projectiles.length; i++) {
-		// projectiles[i].move();
-
-
-
-		// 	// get WORLD position for this projectile	//my cube
-		// let projectilePosition = projectiles[i].myObject.getWorldPosition();
-		//
-		// if (projectilePosition.x > 5 || projectilePosition.x < -5 || 	projectilePosition.z > 5 || projectilePosition.z < -5) {
-		// world.remove(projectiles[i].myContainer);
-		// 	projectiles.splice(i, 1);
-		// 	i--;
-		// 	continue;
-		// }
-	}
-}
 
 
 
