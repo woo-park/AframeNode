@@ -17,10 +17,60 @@ class Player {
   }
 }
 
+let ping = 0;
+
+
+let map1 = [
+  [1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,3,0,3,0,0,0,0,1],
+  [1,0,3,3,3,0,3,0,3,3,0,1],
+  [1,0,0,0,0,0,3,0,3,0,0,1],
+  [1,0,3,3,3,3,3,0,3,3,3,1],
+  [1,0,0,0,0,0,0,0,0,0,0,1],
+  [1,3,3,3,0,3,3,3,3,3,0,1],
+  [1,0,0,3,0,3,0,0,0,0,0,1],
+  [1,0,0,0,0,3,0,3,3,3,3,1],
+  [1,0,3,0,0,3,0,0,0,0,0,1],
+  [1,0,3,3,3,3,3,3,3,3,0,1],
+  [1,0,3,5,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+function randomMap(arg) {
+  let copy = [...arg];
+  // console.log('before', arg)   // doesn't deep copy...but does it matter??
+  copy.forEach((each, index) => {
+    if (index === 0 || index === (copy.length - 1)) {
+      //skip
+    } else {
+      each.forEach((item, i) => {
+        if (i === 0 || i === (item.length - 1)) {
+
+        } else {
+          ranItemNumber = Math.floor(Math.random() * 3)
+
+          ranItemNumber == 0 || ranItemNumber == 1 ? copy[index][i] = 0 : copy[index][i] = 3
+
+        }
+      });
+    }
+  });
+  // console.log('after', copy)
+  return copy
+}
+
+let newMap = randomMap(map1);
+
+
 io.on('connect', (socket) => {
   console.log();
   console.log("player has connected");
   console.log(socket.id, 'connected');
+
+
+
+
+  io.emit('newWorld', {newWorld: newMap});
 
   let initX = Math.floor(Math.random() * 10)
   let initY = 0;
@@ -35,7 +85,12 @@ io.on('connect', (socket) => {
   })
 
   //this updates the class everytime a player is moved, then the updated position becomes the initital pos for new incoming players
+
   socket.on('sendBack_newPos', function(data) {
+
+    console.warn(ping ,' ping');
+    ping += 1
+
     playerArrayServer.forEach((each) => {
         if (each.userId == data.userId){
 

@@ -1,5 +1,11 @@
 /*
 
+1. camera rotation ->
+
+2. optimize code -> check how many pings are being made ->
+
+3. ghost shadow -> id matching not working
+
 
 */
 const socket = io();
@@ -19,6 +25,38 @@ let map1 = [
   [1,0,3,5,0,0,0,0,0,0,0,1],
   [1,1,1,1,1,1,1,1,1,1,1,1]
 ];
+
+socket.on('newWorld', function(data) {
+  console.warn(data)
+  let newMap = data.newWorld;
+  map = newMap;
+})
+
+// moved to the server side -> holds same map entire game
+// function randomMap(arg) {
+//   let copy = [...arg];
+//   console.log('before', arg)   // doesn't deep copy...but does it matter??
+//   copy.forEach((each, index) => {
+//     if (index === 0 || index === (copy.length - 1)) {
+//       //skip
+//     } else {
+//       each.forEach((item, i) => {
+//         if (i === 0 || i === (item.length - 1)) {
+//
+//         } else {
+//           ranItemNumber = Math.floor(Math.random() * 2)
+//
+//           ranItemNumber == 0 ? copy[index][i] = 3 : copy[index][i] = 0
+//         }
+//       });
+//     }
+//   });
+//   console.log('after', copy)
+//   return copy
+// }
+
+// let newMap = randomMap(map1);
+// map = newMap;
 
 let map2 = [
 	[1,1,1,1,1,1,1,1,1,1,1,1],
@@ -51,7 +89,8 @@ let map3 = [
 	[1,0,3,0,3,3,3,3,3,3,0,1],
 	[5,1,1,1,1,1,1,1,1,1,1,1]
 ]
-map = map3;	//defines current map
+// map = map3;	//defines current map // for debugging
+
 
 let tileSize = 10;
 let worldSize = 144;
@@ -59,7 +98,7 @@ let sensor;
 
 let containerMap;
 let playerArrayClient = [];
-let container;
+
 let playerArrayServer;
 let loaded = false;
 let textHolder;
@@ -317,7 +356,9 @@ socket.on('currentPlayers', function(data) {
         console.log(each.xPos +' & '+ each.yPos +' & '+ each.yPos);
 
         //!set the pos here
-        container = new Container3D({x:each.xPos, y:each.yPos, z:each.zPos});
+        //making container local variable solved it
+
+        let container = new Container3D({x:each.xPos, y:each.yPos, z:each.zPos});
         //testing
         // console.log(each.yCurrentRotation,'retrived??');
         container.spinY(each.yCurrentRotation);
@@ -359,23 +400,24 @@ socket.on('currentPlayers', function(data) {
 						// if (container.getChildren().length > 4){
 						// 		console.warn(container.getChildren().length)
 
-							container.addChild(temp_myobj);
+						container.addChild(temp_myobj);
 							// console.warn('loading?')
-
+              console.log(container.getChildren(),'children of container');
+            		console.warn('loading up', container.getChildren().length)
 
 						container.move = () => {
 							temp_myobj.nudge(0,0,-0.3);
 							if (temp_myobj.z < -10){
 								container.removeChild(temp_myobj);
-								for (let i = 2; i < container.getChildren().length - 1; i ++) {
-									container.removeChild(container.getChildren()[i]);
-								}
+								// for (let i = 2; i < container.getChildren().length - 1; i ++) {
+								// 	container.removeChild(container.getChildren()[i]);
+								// }
 
 								container.loaded_bull = false;
 								// console.log('hhhhh')
 
 							}
-							// console.warn(container.getChildren().length)
+							console.warn('after moving', container.getChildren().length)
 
 						}
 				}
@@ -625,15 +667,19 @@ function draw() {
 
       playerArrayClient.forEach((each) => {
         if (socket.id == each.id) {
+            if (frameCount % 10 == 0) {   //temporary working; slowing down the emitting rate, but it will be better to adjust based on how many pixels it moved?
 
-            //!important  // should this go 'here mark'
-            socket.emit('sendBack_newPos', {
-              newPosX:each.getWorldPosition().x,
-              newPosY:each.getWorldPosition().y,
-              newPosZ:each.getWorldPosition().z,
-              userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
-              yCurrentRotation:each.rotationY
-            });
+              //!important  // should this go 'here mark'
+              socket.emit('sendBack_newPos', {
+                newPosX:each.getWorldPosition().x,
+                newPosY:each.getWorldPosition().y,
+                newPosZ:each.getWorldPosition().z,
+                userId:each.id,                               //THIS IS THE LAST ONE I CHANGED HERE   //CHECK AGAIN
+                yCurrentRotation:each.rotationY
+              });
+
+            }
+
 
             // console.log(each.rotationY,'2')
         }
@@ -656,6 +702,7 @@ function draw() {
 	if (mouseIsPressed) {
 		// load up
 		loadsetup();
+    return false;
 	}
 
 } // end of draw
@@ -663,9 +710,14 @@ function draw() {
 function loadsetup(){
 	playerArrayClient.forEach((each) => {
     if (socket.id == each.id) {
-			each.loadup();
+      if(each.getChildren().length >= 3){   //making sure it loads only one at a time
 
-			each.loaded_bull = true;
+      }
+      else {
+        each.loadup();
+      }
+
+			each.loaded_bull = true;   //only when true, shoots
 		}
 	});
 }
@@ -736,6 +788,7 @@ function spinPlayer(spinAmount) {
 	playerArrayClient.forEach((each) => {
 		if (socket.id == each.id) {
 			each.spinY(spinAmount);
+      world.camera.rotateY(spinAmount * 0.5);   //well make the distance shorter between cam and char -> line 815
 		}
 	});
 }
